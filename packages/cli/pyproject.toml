@@ -4,7 +4,9 @@ version = "0.1.0"
 requires-python = ">=3.13"
 dependencies = [
     "core",
+    "python-dotenv>=1.2.2",
     "rich>=15.0.0",
+    "summarizer",
     "typer>=0.26.8",
 ]
 
@@ -13,6 +15,7 @@ cli = "cli.main:app"
 
 [tool.uv.sources]
 core = { workspace = true }
+summarizer = { workspace = true }
 
 [build-system]
 requires = ["uv_build>=0.11.7,<0.12.0"]

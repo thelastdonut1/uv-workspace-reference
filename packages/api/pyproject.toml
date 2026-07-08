@@ -6,6 +6,7 @@ dependencies = [
     "core",
     "fastapi[standard]>=0.139.0",
     "python-dotenv>=1.2.2",
+    "summarizer",
     "uvicorn>=0.51.0",
 ]
 
@@ -14,6 +15,7 @@ api = "api.main:main"
 
 [tool.uv.sources]
 core = { workspace = true }
+summarizer = { workspace = true }
 
 [build-system]
 requires = ["uv_build>=0.11.7,<0.12.0"]
