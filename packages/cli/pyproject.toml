@@ -1,0 +1,19 @@
+[project]
+name = "cli"
+version = "0.1.0"
+requires-python = ">=3.13"
+dependencies = [
+    "core",
+    "rich>=15.0.0",
+    "typer>=0.26.8",
+]
+
+[project.scripts]
+cli = "cli.main:app"
+
+[tool.uv.sources]
+core = { workspace = true }
+
+[build-system]
+requires = ["uv_build>=0.11.7,<0.12.0"]
+build-backend = "uv_build"
