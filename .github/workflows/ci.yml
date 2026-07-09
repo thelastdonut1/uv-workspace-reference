@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
+
+      # Fail if pyproject.toml and uv.lock have drifted apart
+      - run: uv lock --check
+
+      - run: uv sync --all-packages
+
+      # Same pipeline as the local git hooks: fixers, ruff, ty, pytest
+      - run: uvx prek run --all-files
+
+  # The local pre-push guard only sees tags on HEAD; this closes the gap
+  # for tags pushed on older commits.
+  tag-version-sync:
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+      - uses: astral-sh/setup-uv@v7
+      - run: uv run python scripts/check_tag_matches_version.py

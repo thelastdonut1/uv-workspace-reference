@@ -132,7 +132,7 @@ pytest, run with `uv run pytest` from the root (it discovers all packages). Unit
 
 Things worth knowing:
 
-- **Hooks activate per clone, never automatically.** Git only runs what's in your local `.git/hooks/`, and cloning doesn't populate it. `just setup` (or `uvx prek install`) writes the shim once; until then, commits run no checks. CI is the real enforcement layer — local hooks are fast feedback.
+- **Hooks activate per clone, never automatically.** Git only runs what's in your local `.git/hooks/`, and cloning doesn't populate it. `just setup` (or `uvx prek install`) writes the shim once; until then, commits run no checks. CI is the real enforcement layer — local hooks are fast feedback. The workflow in `.github/workflows/ci.yml` runs the same prek pipeline (plus `uv lock --check`) on every push and PR, and re-checks the tag/version guard on tag pushes.
 - **Tool versions come from `uv.lock`, not the hook config.** The ruff/ty/pytest hooks are `repo: local` entries running `uv run ...` in the project environment, so the dev-dependency pins are the single source of truth — no second version to drift.
 - **The whitespace/EOF/YAML hooks use `repo: builtin`**, prek's native Rust implementations of the classic pre-commit hooks. This is a prek extension; vanilla pre-commit would need the `pre-commit/pre-commit-hooks` repo instead.
 - **Fixer hooks abort the commit when they change files.** The fixes land in your working tree — stage them and commit again.
