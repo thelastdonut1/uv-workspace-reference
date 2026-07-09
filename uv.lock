@@ -47,7 +47,7 @@ wheels = [
 
 [[package]]
 name = "api"
-version = "0.1.0"
+version = "1.0.0"
 source = { editable = "packages/api" }
 dependencies = [
     { name = "core" },
@@ -90,7 +90,7 @@ wheels = [
 
 [[package]]
 name = "cli"
-version = "0.1.0"
+version = "1.0.0"
 source = { editable = "packages/cli" }
 dependencies = [
     { name = "core" },
@@ -132,7 +132,7 @@ wheels = [
 
 [[package]]
 name = "core"
-version = "0.1.0"
+version = "1.0.0"
 source = { editable = "packages/core" }
 dependencies = [
     { name = "beautifulsoup4" },
@@ -907,7 +907,7 @@ wheels = [
 
 [[package]]
 name = "summarizer"
-version = "0.1.0"
+version = "1.0.0"
 source = { editable = "packages/summarizer" }
 dependencies = [
     { name = "openai" },
@@ -1000,7 +1000,7 @@ wheels = [
 
 [[package]]
 name = "uv-workspace-reference"
-version = "0.1.0"
+version = "1.0.0"
 source = { virtual = "." }
 
 [package.dev-dependencies]
