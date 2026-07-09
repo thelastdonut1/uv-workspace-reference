@@ -6,13 +6,16 @@ The demo app fetches the top Hacker News headlines and summarizes them with Open
 
 ```
 .
-├── pyproject.toml          # workspace root (virtual — not a package itself); shared ruff config
+├── pyproject.toml          # workspace root (virtual — not a package itself); shared ruff + ty config
 ├── uv.lock                 # ONE lockfile for the whole workspace
+├── justfile                # task runner recipes: setup, lint, fmt, typecheck, test, check
+├── .pre-commit-config.yaml # git hook pipeline, run by prek
 ├── .env.example            # copy to .env and fill in (OPENAI_API_KEY, PORT)
 └── packages/
     ├── core/               # shared library: fetches headlines (httpx + bs4)
     │   ├── pyproject.toml
-    │   └── src/core/
+    │   ├── src/core/
+    │   └── tests/          # each package owns its unit tests (conftest.py + test_*.py)
     ├── summarizer/         # shared library: summarizes text (openai)
     │   ├── pyproject.toml
     │   └── src/summarizer/
@@ -26,11 +29,16 @@ The demo app fetches the top Hacker News headlines and summarizes them with Open
 
 ## Quickstart
 
-Requires [uv](https://docs.astral.sh/uv/) and Python 3.13+ (uv will fetch Python for you if needed).
+Requires [uv](https://docs.astral.sh/uv/) and Python 3.13+ (uv will fetch Python for you if needed). [just](https://just.systems/) is optional but recommended.
 
 ```sh
-# Install everything into a single .venv at the repo root
+# One-time setup: install everything into a single .venv at the repo root
+# and activate the git pre-commit hooks
+just setup
+
+# ...or, without just:
 uv sync --all-packages
+uvx prek install
 
 # Configure your OpenAI API key (used for the summary step)
 cp .env.example .env    # then edit .env and set OPENAI_API_KEY
@@ -97,6 +105,39 @@ build-backend = "uv_build"
 
 `cli` and `api` also expose console scripts via `[project.scripts]`, which is what makes `uv run cli` and `uv run api` work from the workspace root.
 
+## Development workflow
+
+### Tasks
+
+The `justfile` at the root is the entry point for everyday tasks — run bare `just` to list recipes:
+
+| Recipe | What it does |
+|---|---|
+| `just setup` | One-time onboarding: `uv sync --all-packages` + `uvx prek install` |
+| `just lint` | `uv run ruff check --fix` |
+| `just fmt` | `uv run ruff format` |
+| `just typecheck` | `uv run ty check` |
+| `just test` | `uv run pytest` |
+| `just check` | Run every pre-commit hook against all files |
+
+Every recipe is a thin wrapper over a `uv` command, so nothing requires `just` — it's discoverability, not machinery.
+
+### Tests
+
+pytest, run with `uv run pytest` from the root (it discovers all packages). Unit tests are colocated with the package they test, in `packages/<name>/tests/` — no `__init__.py` needed. Shared fixtures and sample data live in that directory's `conftest.py`, with constants exposed to tests via fixtures rather than imports. The root-level `tests/` directory is reserved for future cross-package integration tests.
+
+### Pre-commit hooks
+
+`.pre-commit-config.yaml` at the root defines the pipeline: whitespace/EOF/YAML checks, `ruff check --fix`, `ruff format`, `ty check`, and pytest. It's executed by [prek](https://github.com/j178/prek), a fast Rust reimplementation of [pre-commit](https://pre-commit.com/) that reads the same config format.
+
+Things worth knowing:
+
+- **Hooks activate per clone, never automatically.** Git only runs what's in your local `.git/hooks/`, and cloning doesn't populate it. `just setup` (or `uvx prek install`) writes the shim once; until then, commits run no checks. CI is the real enforcement layer — local hooks are fast feedback.
+- **Tool versions come from `uv.lock`, not the hook config.** The ruff/ty/pytest hooks are `repo: local` entries running `uv run ...` in the project environment, so the dev-dependency pins are the single source of truth — no second version to drift.
+- **The whitespace/EOF/YAML hooks use `repo: builtin`**, prek's native Rust implementations of the classic pre-commit hooks. This is a prek extension; vanilla pre-commit would need the `pre-commit/pre-commit-hooks` repo instead.
+- **Fixer hooks abort the commit when they change files.** The fixes land in your working tree — stage them and commit again.
+- **prek is deliberately not a dev dependency.** It's an orchestrator that runs outside the project environment (install it with `uv tool install prek`, or invoke it ad hoc via `uvx prek`). The dev group is reserved for tools that run *inside* the environment: ruff, ty, pytest.
+
 ## Everyday commands
 
 | Task | Command |
@@ -108,6 +149,9 @@ build-backend = "uv_build"
 | Verify lockfile is current | `uv lock --check` |
 | Lint all packages | `uv run ruff check .` |
 | Format all packages | `uv run ruff format .` |
+| Type check all packages | `uv run ty check` |
+| Run the test suite | `uv run pytest` |
+| Run all pre-commit hooks manually | `uvx prek run --all-files` |
 
 Note that plain `uv sync` (without `--all-packages`) only installs the root's own dependencies; from a member directory, uv commands operate on that member but still use the shared root `.venv` and `uv.lock`.
 
