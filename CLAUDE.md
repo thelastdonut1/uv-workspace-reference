@@ -13,7 +13,9 @@ conda, black, flake8, isort, mypy, or pyright.
 ## Testing
 
 - Framework: pytest — run with `uv run pytest`
-- Tests live in `tests/` at the project root; no `__init__.py` needed
+- Unit tests live in each package's own `tests/` directory, colocated with its
+  source (e.g. `packages/core/tests/`); no `__init__.py` needed
+- Cross-package integration tests go in `tests/` at the workspace root
 - Files named `test_*.py`, functions named `test_*`
 
 ## Type checking
