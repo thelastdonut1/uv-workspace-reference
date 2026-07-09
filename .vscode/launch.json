@@ -1,0 +1,27 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Current File",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Python: CLI",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "cli",
+            "args": ["--limit", "5"],
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Python: API",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "api",
+            "console": "integratedTerminal"
+        }
+    ]
+}
