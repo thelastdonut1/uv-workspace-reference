@@ -8,7 +8,7 @@ default:
 # One-time setup after cloning: install dependencies and activate git hooks
 setup:
     uv sync --all-packages
-    uvx prek install
+    uvx prek install --hook-type pre-commit --hook-type pre-push
 
 # Lint all packages (with autofix)
 lint:

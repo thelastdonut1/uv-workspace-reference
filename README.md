@@ -38,7 +38,7 @@ just setup
 
 # ...or, without just:
 uv sync --all-packages
-uvx prek install
+uvx prek install --hook-type pre-commit --hook-type pre-push
 
 # Configure your OpenAI API key (used for the summary step)
 cp .env.example .env    # then edit .env and set OPENAI_API_KEY
@@ -136,6 +136,11 @@ Things worth knowing:
 - **Tool versions come from `uv.lock`, not the hook config.** The ruff/ty/pytest hooks are `repo: local` entries running `uv run ...` in the project environment, so the dev-dependency pins are the single source of truth — no second version to drift.
 - **The whitespace/EOF/YAML hooks use `repo: builtin`**, prek's native Rust implementations of the classic pre-commit hooks. This is a prek extension; vanilla pre-commit would need the `pre-commit/pre-commit-hooks` repo instead.
 - **Fixer hooks abort the commit when they change files.** The fixes land in your working tree — stage them and commit again.
+- **A pre-push guard keeps release tags honest.** If HEAD carries a `v*` tag,
+  `scripts/check_tag_matches_version.py` requires every pyproject version in
+  the workspace to match it (lockstep versioning), rejecting the push
+  otherwise. No tag, no check. This keeps versions static (so the `uv_build`
+  backend still works) while making tag/version drift impossible to push.
 - **prek is deliberately not a dev dependency.** It's an orchestrator that runs outside the project environment (install it with `uv tool install prek`, or invoke it ad hoc via `uvx prek`). The dev group is reserved for tools that run *inside* the environment: ruff, ty, pytest.
 
 ## Everyday commands
