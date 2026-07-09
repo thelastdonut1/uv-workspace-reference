@@ -30,4 +30,4 @@ quote-style = "double"
 indent-style = "space"
 
 [tool.ty.rules]
-unused-import = "warn"
+unresolved-import = "warn"
