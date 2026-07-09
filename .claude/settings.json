@@ -9,5 +9,31 @@
     },
     "enabledPlugins": {
         "astral@astral-sh": true
+    },
+    "permissions": {
+        "deny": [
+            "Bash(git commit --no-verify *)",
+            "Bash(git commit -n *)",
+            "Bash(git push --no-verify *)"
+        ]
+    },
+    "hooks": {
+        "PreToolUse": [
+            {
+                "matcher": "Bash|PowerShell",
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "uv",
+                        "args": [
+                            "run",
+                            "python",
+                            ".claude/hooks/block_git_hook_bypass.py"
+                        ],
+                        "timeout": 30
+                    }
+                ]
+            }
+        ]
     }
 }
